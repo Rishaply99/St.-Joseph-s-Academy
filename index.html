@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Number Converter</title>
+
+    <style>
+
+        body {
+
+            font-family: Arial, sans-serif;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            height: 100vh;
+
+            margin: 0;
+
+            background-color: #f4f4f4;
+
+        }
+
+
+
+        .container {
+
+            text-align: center;
+
+            background: white;
+
+            padding: 2em;
+
+            border-radius: 8px;
+
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+
+        }
+
+
+
+        .converter {
+
+            margin-top: 2em;
+
+        }
+
+
+
+        input {
+
+            padding: 0.5em;
+
+            margin: 0.5em 0;
+
+            border-radius: 4px;
+
+            border: 1px solid #ccc;
+
+        }
+
+
+
+        button {
+
+            padding: 0.5em 1em;
+
+            border: none;
+
+            border-radius: 4px;
+
+            background-color: #007BFF;
+
+            color: white;
+
+            cursor: pointer;
+
+        }
+
+
+
+        button:hover {
+
+            background-color: #0056b3;
+
+        }
+
+
+
+        p {
+
+            font-weight: bold;
+
+            margin-top: 1em;
+
+        }
+
+
+
+        a {
+
+            display: block;
+
+            margin-top: 1em;
+
+            color: #007BFF;
+
+            text-decoration: none;
+
+        }
+
+
+
+        a:hover {
+
+            text-decoration: underline;
+
+        }
+
+
+
+        #process-details {
+
+            text-align: left;
+
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div id="main-page" class="container">
+
+        <h1>Number Converter</h1>
+
+
+
+        <div class="converter">
+
+            <h2>Decimal to Binary</h2>
+
+            <input type="text" id="decimal-input" placeholder="Enter decimal number (e.g., 12.375)">
+
+            <button onclick="convertToBinary()">Convert to Binary</button>
+
+            <p id="binary-output"></p>
+
+            <a id="binary-process-link" href="#" onclick="showProcess('binary')">See Conversion Process</a>
+
+        </div>
+
+
+
+        <div class="converter">
+
+            <h2>Binary to Decimal</h2>
+
+            <input type="text" id="binary-input" placeholder="Enter binary number (e.g., 1100.011)">
+
+            <button onclick="convertToDecimal()">Convert to Decimal</button>
+
+            <p id="decimal-output"></p>
+
+            <a id="decimal-process-link" href="#" onclick="showProcess('decimal')">See Conversion Process</a>
+
+        </div>
+
+    </div>
+
+
+
+    <div id="process-page" class="container" style="display:none;">
+
+        <h1>Conversion Process</h1>
+
+        <p id="process-details"></p>
+
+        <button onclick="goBack()">Go Back</button>
+
+    </div>
+
+
+
+    <script>
+
+        function convertToBinary() {
+
+            let decimal = document.getElementById('decimal-input').value;
+
+            let [integerPart, fractionalPart] = decimal.split('.');
+
+            let binaryInteger = parseInt(integerPart, 10).toString(2);
+
+            let binaryFraction = '';
+
+
+
+            if (fractionalPart) {
+
+                fractionalPart = '0.' + fractionalPart;
+
+                let fraction = parseFloat(fractionalPart);
+
+                let steps = [];
+
+
+
+                while (fraction > 0) {
+
+                    fraction *= 2;
+
+                    if (fraction >= 1) {
+
+                        binaryFraction += '1';
+
+                        fraction -= 1;
+
+                    } else {
+
+                        binaryFraction += '0';
+
+                    }
+
+                    steps.push(fraction);
+
+                    if (steps.length > 20) break; // Limit the steps to prevent infinite loop
+
+                }
+
+            }
+
+
+
+            let binary = binaryInteger + (binaryFraction ? '.' + binaryFraction : '');
+
+            document.getElementById('binary-output').innerText = `Binary: ${binary}`;
+
+            generateBinaryProcess(decimal, binary, binaryFraction);
+
+        }
+
+
+
+        function convertToDecimal() {
+
+            let binary = document.getElementById('binary-input').value;
+
+            let decimal;
+
+            if (binary.includes('.')) {
+
+                const [integerPart, fractionalPart] = binary.split('.');
+
+                decimal = parseInt(integerPart, 2) + fractionalPart.split('').reduce((acc, bit, index) => acc + bit * Math.pow(2, -(index + 1)), 0);
+
+            } else {
+
+                decimal = parseInt(binary, 2);
+
+            }
+
+            document.getElementById('decimal-output').innerText = `Decimal: ${decimal}`;
+
+            generateDecimalProcess(binary, decimal);
+
+        }
+
+
+
+        function generateBinaryProcess(decimal, binary, binaryFraction) {
+
+            let process = `Conversion of Decimal ${decimal} to Binary:\n\n`;
+
+            let [integerPart, fractionalPart] = decimal.split('.');
+
+            integerPart = parseInt(integerPart, 10);
+
+            let steps = [];
+
+
+
+            // Integer part conversion process
+
+            while (integerPart > 0) {
+
+                steps.push(`${integerPart} ÷ 2 = ${Math.floor(integerPart / 2)} with a remainder of ${integerPart % 2}`);
+
+                integerPart = Math.floor(integerPart / 2);
+
+            }
+
+            process += "Integer Part Conversion:\n" + steps.reverse().join('\n') + "\n\n";
+
+
+
+            // Fractional part conversion process
+
+            if (fractionalPart) {
+
+                process += "Fractional Part Conversion:\n";
+
+                let fraction = parseFloat('0.' + fractionalPart);
+
+                steps = [];
+
+                let binaryFractionSteps = [];
+
+
+
+                while (fraction > 0 && binaryFractionSteps.length < 20) {
+
+                    fraction *= 2;
+
+                    if (fraction >= 1) {
+
+                        binaryFractionSteps.push('1');
+
+                        fraction -= 1;
+
+                    } else {
+
+                        binaryFractionSteps.push('0');
+
+                    }
+
+                    steps.push(`${fraction / 2} × 2 = ${fraction}`);
+
+                }
+
+                process += binaryFractionSteps.join('') + "\n" + steps.join('\n');
+
+            }
+
+
+
+            sessionStorage.setItem('binaryProcess', process);
+
+        }
+
+
+
+        function generateDecimalProcess(binary, decimal) {
+
+            let process = `Conversion of Binary ${binary} to Decimal:\n\n`;
+
+            if (binary.includes('.')) {
+
+                const [integerPart, fractionalPart] = binary.split('.');
+
+                let steps = integerPart.split('').reverse().map((bit, index) => `${bit} × 2^${index} = ${bit * Math.pow(2, index)}`);
+
+                steps.push(`Fractional Part:`);
+
+                steps = steps.concat(fractionalPart.split('').map((bit, index) => `${bit} × 2^${-(index + 1)} = ${bit * Math.pow(2, -(index + 1))}`));
+
+                process += steps.join('\n');
+
+            } else {
+
+                let steps = binary.split('').reverse().map((bit, index) => `${bit} × 2^${index} = ${bit * Math.pow(2, index)}`);
+
+                process += steps.join('\n');
+
+            }
+
+            sessionStorage.setItem('decimalProcess', process);
+
+        }
+
+
+
+        function showProcess(type) {
+
+            let processDetails = document.getElementById('process-details');
+
+            if (type === 'binary') {
+
+                processDetails.innerText = sessionStorage.getItem('binaryProcess');
+
+            } else {
+
+                processDetails.innerText = sessionStorage.getItem('decimalProcess');
+
+            }
+
+            document.getElementById('main-page').style.display = 'none';
+
+            document.getElementById('process-page').style.display = 'block';
+
+        }
+
+
+
+        function goBack() {
+
+            document.getElementById('main-page').style.display = 'block';
+
+            document.getElementById('process-page').style.display = 'none';
+
+        }
+
+    </script>
+
+</body>
+
+  </html>
